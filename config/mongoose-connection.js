@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
+const dbgr = require("debug")("development:mongoose");
+const config = require("config")
 
-mongoose.connect("mongodb://127.0.0.1:27017/boribaba")
+mongoose.connect(`${config.get("MONGODB_URI")}/${config.get("DB_NAME")}`)
 .then(()=>{
-    console.log("connected"); 
+    dbgr("connected"); 
 })
 .catch((err)=>{
-    console.log(err);
+    dbgr(err);
 })
 
 module.exports = mongoose.connection;
