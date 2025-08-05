@@ -4,7 +4,7 @@ const ownerModel = require("../models/owner-model");
 
 router.get("/", (req, res) => {
     res.send("hey");
-    // console.log(process.env.NODE_ENV);
+    
 });
 
 if (process.env.NODE_ENV === "development") {
@@ -12,8 +12,8 @@ if (process.env.NODE_ENV === "development") {
         let owners = await ownerModel.find();
         if (owners.length > 0){
             return res
-                .status(500)
-                .send("you don't have permission to create new owner");
+            .status(500)
+            .send("you don't have permission to create new owner");
         }
         
         let {fullname , email , password} =  req.body;
@@ -24,5 +24,11 @@ if (process.env.NODE_ENV === "development") {
         })
     });
 }
+
+router.get("/admin", (req, res) => {
+    let success = req.flash("success");
+    // let error = req.flash("error");
+    res.render("createproducts",{success});
+});
 
 module.exports = router;
