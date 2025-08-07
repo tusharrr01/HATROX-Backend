@@ -7,8 +7,9 @@ const flash = require("connect-flash");
 
 const ownersRouter =  require("./routes/ownersRouter");
 const productsRouter =  require("./routes/productsRouter");
-const usersRouter =  require("./routes/usersRouter");
-const dashboard = require("./routes/index")
+const authRouter =  require("./routes/authRouter");
+const shopRouter = require("./routes/shopRouter")
+const index = require("./routes/index")
 
 require("dotenv").config();
 
@@ -30,9 +31,10 @@ app.use(express.static(path.join(__dirname,"public")));
 app.set("view engine","ejs");
 
 
-app.use("/" , dashboard);
+app.use("/" , index);
 app.use("/owners" ,ownersRouter);
-app.use("/users" ,usersRouter);
-app.use("/products" ,productsRouter);
+app.use("/auth" ,authRouter);
+app.use("/shop" ,shopRouter);
+app.use("/products" ,productsRouter); 
 
 app.listen(3000);

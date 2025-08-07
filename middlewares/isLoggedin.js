@@ -17,10 +17,10 @@ module.exports = async (req, res, next) => {
             next();
         } catch (error) {
             console.log(error);
-            res.redirect("/");
+            res.redirect("/auth/register");
         }
     }else{
         req.flash("error","You Must Be Logged In");
-        res.redirect("/");
+        res.redirect("/auth/register");
     }
 };
