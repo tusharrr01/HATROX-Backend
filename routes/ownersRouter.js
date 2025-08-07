@@ -7,7 +7,7 @@ router.get("/", (req, res) => {
     
 });
 
-if (process.env.NODE_ENV === "development") {
+// if (process.env.NODE_ENV === "development") {
     router.post("/create", async (req, res) => {
         let owners = await ownerModel.find();
         if (owners.length > 0){
@@ -17,13 +17,14 @@ if (process.env.NODE_ENV === "development") {
         }
         
         let {fullname , email , password} =  req.body;
-        await ownerModel.create({
+        let owner = await ownerModel.create({
             fullname,
             email,
             password,
         })
+        res.send("now the owner of this webapp is " + fullname);
     });
-}
+// }
 
 router.get("/admin", (req, res) => {
     let success = req.flash("success");
