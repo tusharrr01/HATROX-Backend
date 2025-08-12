@@ -1,70 +1,67 @@
+// controllers/authController.js
 const userModel = require("../models/user-model");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../utils/generateToken");
 
 module.exports.registerUser = async (req, res) => {
     try {
-        let { email, password, fullname } = req.body;
+        const { email, password, fullname } = req.body;
 
-        let user = await userModel.findOne({ email: email });
-        if (user) {
-            req.flash("error", "You already have an account, please login");
-            return res.redirect("/auth/register");
+        const existingUser = await userModel.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "You already have an account, please login" });
         }
 
-        bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(password, salt, async (err, hash) => {
-                if (err) {
-                    // console.log(err.message);
-                    return res.redirect("/");
-                } else {
-                    let user = await userModel.create({
-                        email,
-                        password: hash,
-                        fullname
-                    })
+        const hash = await bcrypt.hash(password, 10);
 
-                    let token = generateToken(user);
-                    res.cookie("token", token);
-                    req.flash("success", "User created successfully!");
-                    res.redirect("/auth/register");
-                }
-            })
-        })
+        const user = await userModel.create({
+            email,
+            password: hash,
+            fullname
+        });
+
+        const token = generateToken(user);
+        return res.status(201).json({
+            message: "User created successfully!",
+            token,
+            user: { id: user._id, fullname: user.fullname, email: user.email }
+        });
     } catch (error) {
-        // console.log(error.message);
-        req.flash("error", "Something Went Wrong");
-        res.redirect("/auth/register");
+        return res.status(500).json({ message: "Something went wrong" });
     }
-}
+};
 
 module.exports.loginUser = async (req, res) => {
-    let { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
 
-    let user = await userModel.findOne({ email: email });
-    // console.log(user);
-    
-    if (user) {
-        bcrypt.compare(password, user.password,async (err, result) => {
-            if (result) {
-                let token = generateToken(user);
-                res.cookie("token", token);
+        const user = await userModel.findOne({ email });
+        if (!user) return res.status(400).json({ message: "Invalid email or password" });
 
-                res.redirect("/shop");
-                
-            } else {
-                req.flash("error","Invalid email or password");
-                res.redirect("/auth/register");
-            }
-        })
-    } else {
-        req.flash("error","Invalid email or password");
-        res.redirect("/auth/register");
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) return res.status(400).json({ message: "Invalid email or password" });
+
+        const token = generateToken(user);
+        // Inside your login controller after generating token
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+        // res.status(200).json({ message: "Login successful" });
+
+        return res.json({
+            message: "Login successful",
+            token,
+            user: { id: user._id, fullname: user.fullname, email: user.email }
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Something went wrong" });
     }
-}
+};
 
-module.exports.logoutUser = (req, res)=>{
-    res.cookie("token","");
-    req.flash("succes","Logout Successfully");
-    res.redirect("/auth/register");
-}
+module.exports.logoutUser = (req, res) => {
+    // In token-based auth, logout is handled on client (by deleting token)
+    return res.json({ message: "Logout successful" });
+};

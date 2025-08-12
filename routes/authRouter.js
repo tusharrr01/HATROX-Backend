@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const isloggedin = require("../middlewares/isLoggedin")
+const isLoggedIn = require("../middlewares/isLoggedin");
 const { registerUser, loginUser, logoutUser } = require("../controllers/authController");
 
-router.get("/register", (req, res) => {
-    let success = req.flash("success")
-    let error = req.flash("error")
-    res.render("register", { success, error, loggein: false });
-})
-
+// Register new user
 router.post("/register", registerUser);
+
+// Login user
 router.post("/login", loginUser);
-router.get("/logout", isloggedin, logoutUser);
+
+// Logout user (clears cookie)
+router.post("/logout", isLoggedIn, logoutUser);
+
 module.exports = router;

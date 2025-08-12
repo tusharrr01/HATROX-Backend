@@ -1,35 +1,31 @@
 const express = require("express");
 const router = express.Router();
-const isloggedin = require("../middlewares/isLoggedin");
+const isLoggedIn = require("../middlewares/isLoggedin");
 const productModel = require("../models/product-model");
 const userModel = require("../models/user-model");
-const { addToCart } = require("../controllers/shopController");
-const ownerModel = require("../models/owner-model");
+const { addToCart } = require("../controllers/cartController");
 
-
-
-
-router.get("/", isloggedin, async (req, res) => {
-    let products = await productModel.find();
-    let success = req.flash("success")
-    res.render("shop", { products, success });
+// Public: list products (Shop.jsx can just use /api/products for this, so optional)
+router.get("/", async (req, res) => {
+  try {
+    const products = await productModel.find().lean();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching products" });
+  }
 });
 
-//product detail
-//search route
-
-
-// display route
-router.get("/cart", isloggedin, async (req, res) => {
-    let user = await userModel.findOne({ email: req.user.email }).populate("cart");
-    res.render("cart", { user });
+// Authenticated: get cart contents
+router.get("/cart", isLoggedIn, async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user._id).populate("cart");
+    res.json({ items: user.cart });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching cart" });
+  }
 });
 
-
-router.post("/addtocart/:productid",isloggedin, addToCart);
-
-
-
-
+// Authenticated: add to cart
+router.post("/cart/add", isLoggedIn, addToCart);
 
 module.exports = router;
