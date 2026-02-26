@@ -16,11 +16,14 @@ const productsRouter = require("./routes/productsRouter");
 const authRouter = require("./routes/authRouter");
 const shopRouter = require("./routes/shopRouter");
 const index = require("./routes/index");
+const cartRoutes = require("./routes/cartRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 // CORS: allow React dev server to send/receive cookies
+const corsOrigin = process.env.CORS_ORIGIN || "http://localhost:5173";
 app.use(
   cors({
-    origin: "http://localhost:5173", // your Vite dev URL
+    origin: corsOrigin,
     credentials: true, // allow cookies
   })
 );
@@ -51,5 +54,37 @@ app.use("/owners", ownersRouter);
 app.use("/auth", authRouter);
 app.use("/shop", shopRouter);
 app.use("/products", productsRouter);
+app.use("/cart", cartRoutes);
+app.use("/orders", orderRoutes);
 
-app.listen(3000, () => console.log("API running on http://localhost:3000"));
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  const status = err.status || 500;
+  const message = err.message || "Internal Server Error";
+  res.status(status).json({
+    error: {
+      status,
+      message,
+      ...(process.env.NODE_ENV === "development" && { stack: err.stack })
+    }
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    error: {
+      status: 404,
+      message: "Route not found"
+    }
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.API_HOST || "localhost";
+
+app.listen(PORT, () => {
+  console.log(`✓ API running on http://${HOST}:${PORT}`);
+  console.log(`✓ Environment: ${process.env.NODE_ENV}`);
+});

@@ -3,6 +3,12 @@ const userModel = require("../models/user-model");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../utils/generateToken");
 
+module.exports.getUsers = (req, res) => {
+   userModel.find()
+       .then(users => res.json(users))
+       .catch(err => res.status(500).json({ message: "Error fetching users", error: err }));
+};
+
 module.exports.registerUser = async (req, res) => {
     try {
         const { email, password, fullname } = req.body;
@@ -45,7 +51,6 @@ module.exports.loginUser = async (req, res) => {
         // Inside your login controller after generating token
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
             maxAge: 24 * 60 * 60 * 1000,
         });
@@ -62,6 +67,25 @@ module.exports.loginUser = async (req, res) => {
 };
 
 module.exports.logoutUser = (req, res) => {
-    // In token-based auth, logout is handled on client (by deleting token)
-    return res.json({ message: "Logout successful" });
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",
+  });
+  res.json({ message: "Logged out successfully" });
 };
+
+module.exports.deleteUser = async (req,res) =>{
+    try {
+        const { userId } = req.params;
+        const user = await userModel.findById(userId);
+        if (!user) return res.status(404).json({ message: "user not found" });
+    
+        
+    
+        await user.deleteOne();
+        return res.json({ message: "user deleted successfully" });
+      } catch (err) {
+        return res.status(500).json({ message: "Error deleting user", err });
+      }
+}
+

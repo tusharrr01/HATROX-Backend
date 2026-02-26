@@ -1,17 +1,22 @@
 {
-  "name": "boribaba",
+  "name": "hatrox-api",
   "version": "1.0.0",
   "main": "app.js",
+  "description": "HATROX E-Commerce API Server",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "backend": "nodemon app.js"
+    "start": "node app.js",
+    "backend": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": ["ecommerce", "api", "express"],
+  "author": "Tushar",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cloudinary": "^1.41.3",
     "config": "^4.0.1",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.7",
@@ -24,6 +29,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.4",
     "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.10"
   },
   "devDependencies": {

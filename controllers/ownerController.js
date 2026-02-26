@@ -30,6 +30,14 @@ module.exports.loginOwner = async (req, res) => {
     if (!match) return res.status(400).json({ message: "Invalid email or password" });
 
     const token = generateToken(owner);
+
+    res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: "lax",
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+
+
     return res.json({
       message: "Owner login successful",
       token,
@@ -38,4 +46,12 @@ module.exports.loginOwner = async (req, res) => {
   } catch (err) {
     return res.status(500).json({ message: "Something went wrong" });
   }
+};
+
+module.exports.logoutUser = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",
+  });
+  res.json({ message: "Logged out successfully" });
 };
